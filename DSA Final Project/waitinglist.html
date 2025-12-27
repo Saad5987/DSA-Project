@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waiting List - HomeAlloc</title>
+    <link rel="stylesheet" href="waitinglist.css">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar">
+    <div class="logo">🏠 HomeAlloc</div>
+    <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/apply">Apply Now</a></li>
+        <li><a href="/waiting-list" class="active">Waiting List</a></li>
+        <li><a href="/about">About Us</a></li>
+        <li><a href="/contact">Contact</a></li>
+        <li><a href="/admin/login">Admin</a></li>
+    </ul>
+</nav>
+
+<main>
+    <div class="container">
+        <div class="header-section">
+            <h1>📋 Housing Application Waiting List</h1>
+            <p class="subtitle">Applications sorted by priority score (higher score = higher priority)</p>
+            
+            <div class="controls">
+                <button onclick="location.reload()" class="refresh-btn">
+                    🔄 Refresh List
+                </button>
+                <a href="/apply" class="apply-btn">
+                    📝 New Application
+                </a>
+                <div class="stats">
+                    <span>Total Applications: <strong>{{ applications|length }}</strong></span>
+                    <span>Pending: <strong id="pending-count">{{ applications|selectattr('status', 'equalto', 'pending')|list|length }}</strong></span>
+                </div>
+            </div>
+        </div>
+        
+        {% if applications %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Family</th>
+                        <th>Income</th>
+                        <th>Priority Score</th>
+                        <th>Status</th>
+                        <th>Applied Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ app.name }}</td>
+                        <td>{{ app.age }}</td>
+                        <td>{{ app.family_size }}</td>
+                        <td>Rs {{ "%.0f"|format(app.income) }}</td>
+                        <td>
+                            <span class="priority-badge priority-{{ 'high' if app.priority_score >= 80 else 'medium' if app.priority_score >= 60 else 'low' }}">
+                                {{ app.priority_score }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ app.status }}">
+                                {% if app.status == 'pending' %}⏳ Pending
+                                {% elif app.status == 'approved' %}✅ Approved
+                                {% elif app.status == 'rejected' %}❌ Rejected
+                                {% elif app.status == 'allocated' %}🏠 Allocated
+                                {% else %}{{ app.status|title }}{% endif %}
+                            </span>
+                        </td>
+                        <td>{{ app.applied_date.strftime('%d-%m-%Y') }}</td>
+                        <td>
+                            <button class="view-btn" onclick="viewApplication({{ app.id }})">👁️ View</button>
+                            {% if app.status == 'pending' %}
+                            <span class="waiting">⏳ In Review</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="legend">
+            <h4>📊 Priority Score Legend:</h4>
+            <p><span class="priority-badge priority-high">80-100</span> - High Priority (Allocation within 1-2 weeks)</p>
+            <p><span class="priority-badge priority-medium">60-79</span> - Medium Priority (Allocation within 3-4 weeks)</p>
+            <p><span class="priority-badge priority-low">0-59</span> - Low Priority (Allocation within 1-2 months)</p>
+            
+            <h4 style="margin-top:20px">📋 Status Legend:</h4>
+            <p><span class="status-badge status-pending">⏳ Pending</span> - Under review by admin</p>
+            <p><span class="status-badge status-approved">✅ Approved</span> - Eligible for house allocation</p>
+            <p><span class="status-badge status-allocated">🏠 Allocated</span> - House has been assigned</p>
+            <p><span class="status-badge status-rejected">❌ Rejected</span> - Not eligible for allocation</p>
+        </div>
+        {% else %}
+        <div class="no-data">
+            <div class="empty-state">
+                <h3>📭 No Applications Found</h3>
+                <p>No housing applications have been submitted yet.</p>
+                <p>Be the first to apply for housing!</p>
+                <a href="/apply" class="apply-btn-large">📝 Apply Now</a>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="info-box">
+            <h4>ℹ️ How Priority Score is Calculated:</h4>
+            <ul>
+                <li><strong>Age Factor:</strong> Older applicants get higher priority (18-39: +0, 40-49: +10, 50-59: +20, 60+: +30)</li>
+                <li><strong>Family Size:</strong> Larger families get higher priority (1: +0, 2-3: +10, 4-5: +20, 6+: +30)</li>
+                <li><strong>Income Level:</strong> Lower income gets higher priority (Income ≤ 10,000: +40, ≤ 15,000: +30, ≤ 20,000: +20, >20,000: +10)</li>
+                <li><strong>Maximum Score:</strong> 100 points</li>
+            </ul>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <p>© 2025 HomeAlloc | Showing {{ applications|length }} applications | Last updated: <span id="current-time"></span></p>
+</footer>
+
+<script>
+// Update current time
+function updateTime() {
+    const now = new Date();
+    document.getElementById('current-time').textContent = 
+        now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+}
+updateTime();
+setInterval(updateTime, 60000); // Update every minute
+
+// View application details
+function viewApplication(appId) {
+    fetch(`/api/application/${appId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                alert('Error: ' + data.error);
+                return;
+            }
+            
+            const details = `
+Application Details:
+-------------------
+ID: APP-${data.id}
+Name: ${data.name}
+Age: ${data.age} years
+Family Size: ${data.family_size} members
+Income: Rs ${data.income.toLocaleString()}/month
+Priority Score: ${data.priority_score}/100
+Status: ${data.status}
+Applied: ${data.applied_date}
+Contact: ${data.contact}
+${data.email ? 'Email: ' + data.email : ''}
+${data.address ? 'Address: ' + data.address : ''}
+            `;
+            
+            alert(details);
+        })
+        .catch(err => {
+            alert('Unable to fetch application details');
+        });
+}
+
+// Auto-refresh every 30 seconds
+setTimeout(() => {
+    if(confirm('Refresh waiting list for latest updates?')) {
+        location.reload();
+    }
+}, 30000);
+</script>
+</body>
+</html>

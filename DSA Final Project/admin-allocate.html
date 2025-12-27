@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Allocate Houses - HomeAlloc Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Lato', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .admin-container {
+            display: flex;
+            width: 95%;
+            max-width: 1600px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #2d3748 0%, #1a202c 100%);
+            color: white;
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        
+        .sidebar-header h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #63b3ed;
+        }
+        
+        .admin-name {
+            background: rgba(99, 179, 237, 0.2);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .sidebar-nav ul {
+            list-style: none;
+            flex-grow: 1;
+        }
+        
+        .sidebar-nav li {
+            margin-bottom: 15px;
+        }
+        
+        .sidebar-nav a {
+            color: #cbd5e0;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-nav a:hover, .sidebar-nav a.active {
+            background: rgba(99, 179, 237, 0.2);
+            color: #63b3ed;
+            transform: translateX(5px);
+        }
+        
+        .logout-btn {
+            color: #fc8181 !important;
+            margin-top: 20px;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #f7fafc;
+        }
+        
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .main-header h1 {
+            font-family: 'Montserrat', sans-serif;
+            color: #2d3748;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .auto-btn, .refresh-btn, .history-btn {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: bold;
+        }
+        
+        .auto-btn {
+            background: #9f7aea;
+        }
+        
+        .history-btn {
+            background: #ed8936;
+        }
+        
+        .allocation-interface {
+            display: grid;
+            grid-template-columns: 1fr 1fr 350px;
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .allocation-column {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .column-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .column-header h3 {
+            color: #2d3748;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .column-header small {
+            color: #718096;
+            font-size: 14px;
+        }
+        
+        .applications-list, .houses-list {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+        
+        .application-item, .house-item {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .application-item:hover, .house-item:hover,
+        .application-item.selected, .house-item.selected {
+            border-color: #4299e1;
+            background: #ebf8ff;
+        }
+        
+        .app-info h4, .house-info h4 {
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+        
+        .app-info p, .house-info p {
+            color: #4a5568;
+            font-size: 14px;
+            margin-bottom: 3px;
+        }
+        
+        .priority-score {
+            background: #4299e1;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .app-actions, .house-actions {
+            text-align: right;
+            margin-top: 10px;
+        }
+        
+        .small-btn {
+            background: #e2e8f0;
+            color: #4a5568;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .allocation-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .panel-header h3 {
+            color: #2d3748;
+            font-size: 18px;
+        }
+        
+        .match-score {
+            background: #48bb78;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .selection-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .selected-item {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 15px;
+            border: 2px dashed #cbd5e0;
+        }
+        
+        .selected-item h4 {
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .selected-item p {
+            color: #718096;
+            font-size: 14px;
+        }
+        
+        .no-selection {
+            font-style: italic;
+            text-align: center;
+            padding: 20px 0;
+        }
+        
+        .allocation-details {
+            background: #edf2f7;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            flex: 1;
+        }
+        
+        .allocation-details h4 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .allocation-details p {
+            color: #4a5568;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .allocation-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .allocate-btn, .clear-btn, .match-btn {
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .allocate-btn {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .allocate-btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+        }
+        
+        .clear-btn {
+            background: #fed7d7;
+            color: #c53030;
+        }
+        
+        .match-btn {
+            background: #4299e1;
+            color: white;
+        }
+        
+        .allocation-notes {
+            margin-top: 20px;
+        }
+        
+        .allocation-notes h4 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .allocation-notes textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            min-height: 80px;
+            resize: vertical;
+            outline: none;
+        }
+        
+        .suggestions-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .suggestions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .suggestion-card {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s;
+        }
+        
+        .suggestion-card:hover {
+            border-color: #4299e1;
+            transform: translateY(-3px);
+        }
+        
+        .suggestion-match {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+        
+        .match-percent {
+            background: #4299e1;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .suggestion-details {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .suggestion-app, .suggestion-house {
+            flex: 1;
+        }
+        
+        .suggestion-app h4, .suggestion-house h4 {
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+        
+        .suggestion-app p, .suggestion-house p {
+            color: #4a5568;
+            font-size: 14px;
+            margin-bottom: 3px;
+        }
+        
+        .suggestion-arrow {
+            font-size: 24px;
+            color: #4299e1;
+        }
+        
+        .suggestion-actions {
+            text-align: center;
+        }
+        
+        .quick-btn {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #a0aec0;
+        }
+        
+        @media (max-width: 1024px) {
+            .admin-container {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                padding: 15px;
+            }
+            
+            .sidebar-nav ul {
+                display: flex;
+                gap: 10px;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .allocation-interface {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .suggestions-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .suggestion-details {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .selection-display {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">🏠</div>
+                <h2>HomeAlloc Admin</h2>
+                <p class="admin-name">👤 {{ session.get('admin_username', 'Admin') }}</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="/admin/dashboard">📊 Dashboard</a></li>
+                    <li><a href="/admin/applications">📋 Applications</a></li>
+                    <li><a href="/admin/houses">🏠 Houses</a></li>
+                    <li><a href="/admin/allocate" class="active">⚡ Allocate</a></li>
+                    <li><a href="/admin/logout" class="logout-btn">🚪 Logout</a></li>
+                </ul>
+            </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <h1>⚡ Allocate Houses</h1>
+                <div class="header-actions">
+                    <button onclick="runAutoAllocation()" class="auto-btn">🤖 Auto Allocate</button>
+                    <button onclick="location.reload()" class="refresh-btn">🔄 Refresh</button>
+                    <button onclick="showAllocationHistory()" class="history-btn">📜 History</button>
+                </div>
+            </header>
+            
+            <!-- Allocation Interface -->
+            <div class="allocation-interface">
+                <div class="allocation-column">
+                    <div class="column-header">
+                        <h3>📋 Approved Applications ({{ applications|length }})</h3>
+                        <small>Select an application to allocate a house</small>
+                    </div>
+                    
+                    {% if applications %}
+                    <div class="applications-list" id="applicationsList">
+                        {% for app in applications %}
+                        <div class="application-item" id="app-item-{{ app.id }}" onclick="selectApplication({{ app.id }})">
+                            <div class="app-info">
+                                <h4>{{ app.name }}</h4>
+                                <p>👤 Age: {{ app.age }} | 👨‍👩‍👧‍👦 Family: {{ app.family_size }}</p>
+                                <p>🎯 Priority: <span class="priority-score">{{ app.priority_score }}</span></p>
+                            </div>
+                            <div class="app-actions">
+                                <button onclick="viewAppDetails({{ app.id }})" class="small-btn">👁️</button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <p>✅ No approved applications pending allocation.</p>
+                        <p>All applications have been allocated houses.</p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="allocation-column">
+                    <div class="column-header">
+                        <h3>🏠 Available Houses ({{ houses|length }})</h3>
+                        <small>Select a house to allocate</small>
+                    </div>
+                    
+                    {% if houses %}
+                    <div class="houses-list" id="housesList">
+                        {% for house in houses %}
+                        <div class="house-item" id="house-item-{{ house.id }}" onclick="selectHouse({{ house.id }})">
+                            <div class="house-info">
+                                <h4>{{ house.house_id }}</h4>
+                                <p>📍 {{ house.address|truncate(30) }}</p>
+                                <p>🏘️ {{ house.house_type|title }} | 🛏️ {{ house.bedrooms }} BR</p>
+                            </div>
+                            <div class="house-actions">
+                                <button onclick="viewHouseDetails({{ house.id }})" class="small-btn">👁️</button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <p>🏚️ No houses available for allocation.</p>
+                        <p>Add more houses or wait for houses to become available.</p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Allocation Panel -->
+                <div class="allocation-panel">
+                    <div class="panel-header">
+                        <h3>🤝 Allocation Panel</h3>
+                        <div class="match-score" id="matchScoreDisplay">Match: --%</div>
+                    </div>
+                    
+                    <div class="selection-display">
+                        <div class="selected-item" id="selectedApplication">
+                            <h4>👤 Selected Application</h4>
+                            <p class="no-selection">Click on an application →</p>
+                        </div>
+                        
+                        <div class="selected-item" id="selectedHouse">
+                            <h4>🏠 Selected House</h4>
+                            <p class="no-selection">Click on a house →</p>
+                        </div>
+                    </div>
+                    
+                    <div class="allocation-details" id="allocationDetails">
+                        <p>Select both an application and a house to see allocation details.</p>
+                    </div>
+                    
+                    <div class="allocation-actions">
+                        <button onclick="allocateSelected()" class="allocate-btn" id="allocateBtn" disabled>
+                            ⚡ Allocate House
+                        </button>
+                        <button onclick="clearSelection()" class="clear-btn">
+                            🗑️ Clear Selection
+                        </button>
+                        <button onclick="findBestMatch()" class="match-btn">
+                            🔍 Find Best Match
+                        </button>
+                    </div>
+                    
+                    <div class="allocation-notes">
+                        <h4>📝 Allocation Notes</h4>
+                        <textarea id="allocationNotes" placeholder="Add notes about this allocation..."></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Suggested Allocations -->
+            {% if suggestions %}
+            <div class="suggestions-section">
+                <div class="section-header">
+                    <h3>💡 Suggested Allocations</h3>
+                    <small>Based on priority and compatibility scores</small>
+                </div>
+                
+                <div class="suggestions-grid">
+                    {% for suggestion in suggestions %}
+                    <div class="suggestion-card">
+                        <div class="suggestion-match">
+                            <span class="match-percent">{{ suggestion.match_score }}% Match</span>
+                        </div>
+                        
+                        <div class="suggestion-details">
+                            <div class="suggestion-app">
+                                <h4>👤 {{ suggestion.application.name }}</h4>
+                                <p>Priority: {{ suggestion.application.priority_score }}</p>
+                                <p>Family: {{ suggestion.application.family_size }} members</p>
+                            </div>
+                            
+                            <div class="suggestion-arrow">➡️</div>
+                            
+                            <div class="suggestion-house">
+                                <h4>🏠 {{ suggestion.house.house_id }}</h4>
+                                <p>{{ suggestion.house.house_type|title }} | {{ suggestion.house.bedrooms }} BR</p>
+                            </div>
+                        </div>
+                        
+                        <div class="suggestion-actions">
+                            <button onclick="quickAllocate({{ suggestion.application.id }}, {{ suggestion.house.id }})" class="quick-btn">
+                                ⚡ Quick Allocate
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+    
+    <script>
+        let selectedAppId = null;
+        let selectedHouseId = null;
+        let selectedAppData = null;
+        let selectedHouseData = null;
+        
+        // Application selection
+        function selectApplication(appId) {
+            selectedAppId = appId;
+            
+            // Remove previous selection
+            document.querySelectorAll('.application-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // Add selection
+            document.getElementById(`app-item-${appId}`).classList.add('selected');
+            
+            // Get application data
+            fetch(`/api/application/${appId}`)
+                .then(res => res.json())
+                .then(data => {
+                    selectedAppData = data;
+                    updateSelectedApplicationDisplay();
+                    updateAllocationDetails();
+                });
+        }
+        
+        // House selection
+        function selectHouse(houseId) {
+            selectedHouseId = houseId;
+            
+            // Remove previous selection
+            document.querySelectorAll('.house-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // Add selection
+            document.getElementById(`house-item-${houseId}`).classList.add('selected');
+            
+            // Get house data
+            fetch(`/api/house/${houseId}`)
+                .then(res => res.json())
+                .then(data => {
+                    selectedHouseData = data;
+                    updateSelectedHouseDisplay();
+                    updateAllocationDetails();
+                });
+        }
+        
+        // Update display
+        function updateSelectedApplicationDisplay() {
+            if (selectedAppData) {
+                document.getElementById('selectedApplication').innerHTML = `
+                    <h4>👤 ${selectedAppData.name}</h4>
+                    <p>Age: ${selectedAppData.age} | Family: ${selectedAppData.family_size}</p>
+                    <p>Priority: ${selectedAppData.priority_score}/100</p>
+                    <p>Applied: ${selectedAppData.applied_date}</p>
+                `;
+            }
+        }
+        
+        function updateSelectedHouseDisplay() {
+            if (selectedHouseData) {
+                document.getElementById('selectedHouse').innerHTML = `
+                    <h4>🏠 ${selectedHouseData.house_id}</h4>
+                    <p>${selectedHouseData.address}</p>
+                    <p>${selectedHouseData.house_type} | ${selectedHouseData.bedrooms} BR</p>
+                    <p>${selectedHouseData.size} sqft</p>
+                    <p>Status: ${selectedHouseData.status}</p>
+                `;
+            }
+        }
+        
+        function updateAllocationDetails() {
+            if (selectedAppData && selectedHouseData) {
+                // Calculate match score
+                const matchScore = calculateMatchScore(selectedAppData, selectedHouseData);
+                document.getElementById('matchScoreDisplay').textContent = `Match: ${matchScore}%`;
+                
+                // Enable allocate button
+                document.getElementById('allocateBtn').disabled = false;
+                
+                // Show allocation details
+                document.getElementById('allocationDetails').innerHTML = `
+                    <h4>📊 Allocation Analysis</h4>
+                    <p><strong>Match Score:</strong> ${matchScore}% ${matchScore >= 80 ? '🎯 Excellent' : matchScore >= 60 ? '👍 Good' : '⚠️ Fair'}</p>
+                    <p><strong>Family Fit:</strong> ${selectedAppData.family_size} members in ${selectedHouseData.bedrooms} BR</p>
+                    <p><strong>Estimated Allocation:</strong> ${getAllocationTime(selectedAppData.priority_score)}</p>
+                `;
+            }
+        }
+        
+        function calculateMatchScore(app, house) {
+            let score = 50;
+            
+            // Bedroom compatibility (50 points max)
+            const idealBedrooms = Math.ceil(app.family_size / 2);
+            const bedroomDiff = Math.abs(house.bedrooms - idealBedrooms);
+            score += Math.max(0, 50 - (bedroomDiff * 10));
+            
+            return Math.min(100, Math.round(score));
+        }
+        
+        function getAllocationTime(priorityScore) {
+            if (priorityScore >= 80) return "1-2 weeks";
+            if (priorityScore >= 60) return "2-3 weeks";
+            return "3-4 weeks";
+        }
+        
+        // Allocation actions
+        function allocateSelected() {
+            if (!selectedAppId || !selectedHouseId) {
+                alert('Please select both an application and a house.');
+                return;
+            }
+            
+            const notes = document.getElementById('allocationNotes').value;
+            
+            if (confirm(`Allocate ${selectedHouseData.house_id} to ${selectedAppData.name}?\nMatch Score: ${calculateMatchScore(selectedAppData, selectedHouseData)}%`)) {
+                fetch('/admin/api/allocate-house', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        application_id: selectedAppId,
+                        house_id: selectedHouseId,
+                        notes: notes
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('✅ ' + data.message);
+                        location.reload();
+                    } else {
+                        alert('❌ Error: ' + data.error);
+                    }
+                });
+            }
+        }
+        
+        function quickAllocate(appId, houseId) {
+            if (confirm('Quick allocate this suggestion?')) {
+                fetch('/admin/api/allocate-house', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        application_id: appId,
+                        house_id: houseId
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('✅ ' + data.message);
+                        location.reload();
+                    }
+                });
+            }
+        }
+        
+        function clearSelection() {
+            selectedAppId = null;
+            selectedHouseId = null;
+            selectedAppData = null;
+            selectedHouseData = null;
+            
+            document.querySelectorAll('.application-item, .house-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            document.getElementById('selectedApplication').innerHTML = `
+                <h4>👤 Selected Application</h4>
+                <p class="no-selection">Click on an application →</p>
+            `;
+            
+            document.getElementById('selectedHouse').innerHTML = `
+                <h4>🏠 Selected House</h4>
+                <p class="no-selection">Click on a house →</p>
+            `;
+            
+            document.getElementById('allocationDetails').innerHTML = `
+                <p>Select both an application and a house to see allocation details.</p>
+            `;
+            
+            document.getElementById('matchScoreDisplay').textContent = 'Match: --%';
+            document.getElementById('allocateBtn').disabled = true;
+            document.getElementById('allocationNotes').value = '';
+        }
+        
+        function findBestMatch() {
+            if (!selectedAppId) {
+                alert('Please select an application first.');
+                return;
+            }
+            
+            // Find best matching house
+            const houseItems = document.querySelectorAll('.house-item');
+            let bestHouseId = null;
+            let bestMatchScore = -1;
+            
+            houseItems.forEach(item => {
+                const houseId = item.id.replace('house-item-', '');
+                // In real app, you would calculate match scores
+            });
+            
+            if (bestHouseId) {
+                selectHouse(bestHouseId);
+                alert(`🔍 Best match found! House ${bestHouseId} with ${bestMatchScore}% compatibility.`);
+            }
+        }
+        
+        function runAutoAllocation() {
+            if (confirm('Run automatic allocation algorithm?\nThis will suggest allocations for all approved applications.')) {
+                fetch('/admin/api/run-allocation-algorithm', {
+                    method: 'POST'
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`🤖 Algorithm completed!\n\nFound ${data.greedy_allocations} possible allocations.\nCheck suggestions below.`);
+                        location.reload();
+                    }
+                });
+            }
+        }
+        
+        function showAllocationHistory() {
+            alert('📜 Allocation history feature would show past allocations.');
+        }
+        
+        function viewAppDetails(appId) {
+            event.stopPropagation();
+            window.open(`/admin/applications#app-${appId}`, '_blank');
+        }
+        
+        function viewHouseDetails(houseId) {
+            event.stopPropagation();
+            alert('House details would be shown here.');
+        }
+        
+        // Check URL for pre-selections
+        const urlParams = new URLSearchParams(window.location.search);
+        const appParam = urlParams.get('app');
+        const houseParam = urlParams.get('house');
+        
+        if (appParam) {
+            setTimeout(() => selectApplication(parseInt(appParam)), 500);
+        }
+        if (houseParam) {
+            setTimeout(() => selectHouse(parseInt(houseParam)), 500);
+        }
+    </script>
+</body>
+</html>

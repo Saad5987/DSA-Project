@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply for Housing - HomeAlloc</title>
+    <link rel="stylesheet" href="application.css">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar">
+    <div class="logo">🏠 HomeAlloc</div>
+    <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/apply" class="active">Apply Now</a></li>
+        <li><a href="/waiting-list">Waiting List</a></li>
+        <li><a href="/about">About Us</a></li>
+        <li><a href="/contact">Contact</a></li>
+        <li><a href="/admin/login">Admin</a></li>
+    </ul>
+</nav>
+
+<main>
+    <div class="form-container">
+        <div class="form-header">
+            <h1>🏠 Housing Application Form</h1>
+            <p class="subtitle">Fill out this form to apply for housing allocation. All fields marked with * are required.</p>
+        </div>
+        
+        <form action="/apply" method="POST" id="applicationForm">
+            <div class="form-section">
+                <h3>👤 Personal Information</h3>
+                
+                <div class="form-group">
+                    <label for="name">Full Name *</label>
+                    <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="age">Age *</label>
+                        <input type="number" id="age" name="age" placeholder="Enter age" min="18" max="100" required>
+                        <small>Must be 18+ years</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="family">Family Size *</label>
+                        <input type="number" id="family" name="family" placeholder="Number of members" min="1" max="20" required>
+                        <small>Including yourself</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3>💰 Financial Information</h3>
+                
+                <div class="form-group">
+                    <label for="income">Monthly Income (PKR) *</label>
+                    <input type="number" id="income" name="income" placeholder="Enter monthly income" min="0" required>
+                    <small>Your total monthly household income</small>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3>📞 Contact Information</h3>
+                
+                <div class="form-group">
+                    <label for="contact">Contact Number *</label>
+                    <input type="tel" id="contact" name="contact" placeholder="03XX-XXXXXXX" pattern="[0-9]{11}" required>
+                    <small>11-digit Pakistan mobile number</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="your.email@example.com">
+                    <small>Optional - for updates</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="address">Current Address</label>
+                    <textarea id="address" name="address" placeholder="Enter your current full address" rows="3"></textarea>
+                    <small>Optional - helps in allocation</small>
+                </div>
+            </div>
+            
+            <div class="form-note">
+                <p>⚠️ <strong>Important:</strong> Applications are prioritized based on age, family size, and income. Higher priority scores get faster allocation.</p>
+                <p>📊 Your priority score will be calculated automatically after submission.</p>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="submit-btn">📤 Submit Application</button>
+                <button type="reset" class="reset-btn">🗑️ Clear Form</button>
+                <a href="/" class="cancel-btn">❌ Cancel</a>
+            </div>
+        </form>
+        
+        <div class="form-footer">
+            <p>After submission, you can track your application on the <a href="/waiting-list">Waiting List</a> page.</p>
+            <p>Need help? <a href="/contact">Contact our support team</a>.</p>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <p>© 2025 HomeAlloc - Fair Housing Allocation System | <a href="/">Home</a> | <a href="/waiting-list">Waiting List</a></p>
+</footer>
+
+<script>
+document.getElementById('applicationForm').addEventListener('submit', function(e) {
+    // Validate form
+    const age = parseInt(document.getElementById('age').value);
+    const family = parseInt(document.getElementById('family').value);
+    const income = parseInt(document.getElementById('income').value);
+    
+    if (age < 18) {
+        alert('Age must be 18 or older');
+        e.preventDefault();
+        return;
+    }
+    
+    if (family < 1) {
+        alert('Family size must be at least 1');
+        e.preventDefault();
+        return;
+    }
+    
+    if (income < 0) {
+        alert('Income cannot be negative');
+        e.preventDefault();
+        return;
+    }
+    
+    // Show loading
+    const submitBtn = document.querySelector('.submit-btn');
+    submitBtn.innerHTML = '⏳ Processing...';
+    submitBtn.disabled = true;
+});
+</script>
+</body>
+</html>

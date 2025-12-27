@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Applications - HomeAlloc Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Lato', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .admin-container {
+            display: flex;
+            width: 95%;
+            max-width: 1400px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #2d3748 0%, #1a202c 100%);
+            color: white;
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        
+        .sidebar-header h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #63b3ed;
+        }
+        
+        .admin-name {
+            background: rgba(99, 179, 237, 0.2);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .sidebar-nav ul {
+            list-style: none;
+            flex-grow: 1;
+        }
+        
+        .sidebar-nav li {
+            margin-bottom: 15px;
+        }
+        
+        .sidebar-nav a {
+            color: #cbd5e0;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-nav a:hover, .sidebar-nav a.active {
+            background: rgba(99, 179, 237, 0.2);
+            color: #63b3ed;
+            transform: translateX(5px);
+        }
+        
+        .logout-btn {
+            color: #fc8181 !important;
+            margin-top: 20px;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #f7fafc;
+        }
+        
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .main-header h1 {
+            font-family: 'Montserrat', sans-serif;
+            color: #2d3748;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .search-box {
+            display: flex;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .search-box input {
+            border: none;
+            padding: 8px 15px;
+            width: 200px;
+            outline: none;
+        }
+        
+        .search-box button {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+        
+        .refresh-btn, select {
+            background: white;
+            border: 2px solid #e2e8f0;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        select {
+            min-width: 150px;
+        }
+        
+        .table-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .table-header h3 {
+            color: #2d3748;
+            font-size: 20px;
+        }
+        
+        .table-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .export-btn, .filter-btn {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .filter-btn {
+            background: #ed8936;
+        }
+        
+        .table-container.large {
+            overflow-x: auto;
+            max-height: 400px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px; /* Reduced from 1000px */
+        }
+        
+        th {
+            background: #f7fafc;
+            padding: 15px;
+            text-align: left;
+            color: #4a5568;
+            font-weight: 600;
+            border-bottom: 2px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #2d3748;
+        }
+        
+        tr:hover {
+            background: #f7fafc;
+        }
+        
+        .priority-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        .priority-high { background: #fed7d7; color: #c53030; }
+        .priority-medium { background: #feebc8; color: #c05621; }
+        .priority-low { background: #c6f6d5; color: #276749; }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .status-pending { background: #feebc8; color: #c05621; }
+        .status-approved { background: #c6f6d5; color: #276749; }
+        .status-rejected { background: #fed7d7; color: #c53030; }
+        .status-allocated { background: #bee3f8; color: #2c5282; }
+        
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            min-width: 36px;
+        }
+        
+        .view { background: #e2e8f0; color: #4a5568; }
+        .approve { background: #c6f6d5; color: #276749; }
+        .reject { background: #fed7d7; color: #c53030; }
+        .allocate { background: #bee3f8; color: #2c5282; }
+        .pending { background: #feebc8; color: #c05621; }
+        .delete { background: #fc8181; color: white; }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #a0aec0;
+        }
+        
+        .bulk-actions {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .bulk-actions h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .bulk-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .bulk-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .bulk-btn.approve {
+            background: #c6f6d5;
+            color: #276749;
+        }
+        
+        .bulk-btn.reject {
+            background: #fed7d7;
+            color: #c53030;
+        }
+        
+        .bulk-btn.export {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 10px;
+            transition: transform 0.3s;
+        }
+        
+        .stat-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-item h4 {
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .stat-item p {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        @media (max-width: 1024px) {
+            .admin-container {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                padding: 15px;
+            }
+            
+            .sidebar-nav ul {
+                display: flex;
+                gap: 10px;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .table-container.large {
+                max-height: 500px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .search-box input {
+                width: 150px;
+            }
+            
+            .table-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .bulk-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">🏠</div>
+                <h2>HomeAlloc Admin</h2>
+                <p class="admin-name">👤 {{ session.get('admin_username', 'Admin') }}</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="/admin/dashboard">📊 Dashboard</a></li>
+                    <li><a href="/admin/applications" class="active">📋 Applications</a></li>
+                    <li><a href="/admin/houses">🏠 Houses</a></li>
+                    <li><a href="/admin/allocate">⚡ Allocate</a></li>
+                    <li><a href="/admin/logout" class="logout-btn">🚪 Logout</a></li>
+                </ul>
+            </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <h1>📋 Manage Applications</h1>
+                <div class="header-actions">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Search applications...">
+                        <button onclick="searchApplications()">🔍</button>
+                    </div>
+                    <button onclick="location.reload()" class="refresh-btn">🔄 Refresh</button>
+                    <select id="statusFilter" onchange="filterApplications()">
+                        <option value="all">All Status</option>
+                        <option value="pending">⏳ Pending</option>
+                        <option value="approved">✅ Approved</option>
+                        <option value="rejected">❌ Rejected</option>
+                        <option value="allocated">🏠 Allocated</option>
+                    </select>
+                </div>
+            </header>
+            
+            <!-- Applications Table -->
+            <div class="table-section">
+                <div class="table-header">
+                    <h3>Applications List ({{ applications|length }} total)</h3>
+                    <div class="table-actions">
+                        <button onclick="exportToCSV()" class="export-btn">📥 Export CSV</button>
+                        <button onclick="showPendingOnly()" class="filter-btn">⏳ Show Pending</button>
+                    </div>
+                </div>
+                
+                <div class="table-container large">
+                    <table id="applicationsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Age</th>
+                                <th>Family</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Applied</th>
+                                <th>Contact</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in applications %}
+                            <tr id="app-{{ app.id }}">
+                                <td>APP-{{ app.id }}</td>
+                                <td>{{ app.name }}</td>
+                                <td>{{ app.age }}</td>
+                                <td>{{ app.family_size }}</td>
+                                <td>
+                                    <span class="priority-badge priority-{{ 'high' if app.priority_score >= 80 else 'medium' if app.priority_score >= 60 else 'low' }}">
+                                        {{ app.priority_score }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-badge status-{{ app.status }}">
+                                        {{ app.status|title }}
+                                    </span>
+                                </td>
+                                <td>{{ app.applied_date.strftime('%d-%m-%Y') }}</td>
+                                <td>{{ app.contact }}</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button onclick="viewApplicationDetails({{ app.id }})" class="action-btn view" title="View Details">
+                                            👁️
+                                        </button>
+                                        
+                                        {% if app.status == 'pending' %}
+                                        <button onclick="approveApplication({{ app.id }})" class="action-btn approve" title="Approve">
+                                            ✅
+                                        </button>
+                                        <button onclick="rejectApplication({{ app.id }})" class="action-btn reject" title="Reject">
+                                            ❌
+                                        </button>
+                                        {% elif app.status == 'approved' %}
+                                        <button onclick="allocateApplication({{ app.id }})" class="action-btn allocate" title="Allocate House">
+                                            🏠
+                                        </button>
+                                        <button onclick="markPending({{ app.id }})" class="action-btn pending" title="Mark Pending">
+                                            ↩️
+                                        </button>
+                                        {% elif app.status == 'rejected' %}
+                                        <button onclick="approveApplication({{ app.id }})" class="action-btn approve" title="Approve">
+                                            ✅
+                                        </button>
+                                        {% endif %}
+                                        
+                                        <button onclick="deleteApplication({{ app.id }})" class="action-btn delete" title="Delete">
+                                            🗑️
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                {% if not applications %}
+                <div class="empty-state">
+                    <h3>📭 No Applications Found</h3>
+                    <p>No applications have been submitted yet.</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Bulk Actions -->
+            <div class="bulk-actions">
+                <h3>⚡ Bulk Actions</h3>
+                <div class="bulk-buttons">
+                    <button onclick="approveAllPending()" class="bulk-btn approve">✅ Approve All Pending</button>
+                    <button onclick="rejectAllPending()" class="bulk-btn reject">❌ Reject All Pending</button>
+                    <button onclick="exportAllData()" class="bulk-btn export">📥 Export All Data</button>
+                </div>
+            </div>
+            
+            <!-- Stats Summary -->
+            <div class="stats-summary">
+                <div class="stat-item">
+                    <h4>⏳ Pending</h4>
+                    <p>{{ applications|selectattr('status', 'equalto', 'pending')|list|length }}</p>
+                </div>
+                <div class="stat-item">
+                    <h4>✅ Approved</h4>
+                    <p>{{ applications|selectattr('status', 'equalto', 'approved')|list|length }}</p>
+                </div>
+                <div class="stat-item">
+                    <h4>🏠 Allocated</h4>
+                    <p>{{ applications|selectattr('status', 'equalto', 'allocated')|list|length }}</p>
+                </div>
+                <div class="stat-item">
+                    <h4>❌ Rejected</h4>
+                    <p>{{ applications|selectattr('status', 'equalto', 'rejected')|list|length }}</p>
+                </div>
+                <div class="stat-item">
+                    <h4>📊 Avg Priority</h4>
+                    <p>
+                        {% set total_score = applications|sum(attribute='priority_score') %}
+                        {% set count = applications|length %}
+                        {{ (total_score/count)|round(1) if count > 0 else 0 }}
+                    </p>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        // Application Actions
+        function viewApplicationDetails(appId) {
+            fetch(`/api/application/${appId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Error: ' + data.error);
+                        return;
+                    }
+                    
+                    const details = `
+📋 APPLICATION DETAILS
+=====================
+ID: APP-${data.id}
+Name: ${data.name}
+Age: ${data.age} years
+Family Size: ${data.family_size} members
+Priority Score: ${data.priority_score}/100
+Status: ${data.status}
+Applied: ${data.applied_date}
+Contact: ${data.contact}
+Email: ${data.email || 'N/A'}
+Address: ${data.address || 'N/A'}
+                    `;
+                    
+                    alert(details);
+                });
+        }
+        
+        function approveApplication(appId) {
+            if (confirm('Approve this application?')) {
+                updateApplicationStatus(appId, 'approve');
+            }
+        }
+        
+        function rejectApplication(appId) {
+            if (confirm('Reject this application?')) {
+                updateApplicationStatus(appId, 'reject');
+            }
+        }
+        
+        function markPending(appId) {
+            if (confirm('Mark this application as pending?')) {
+                updateApplicationStatus(appId, 'pending');
+            }
+        }
+        
+        function allocateApplication(appId) {
+            window.location.href = `/admin/allocate#app-${appId}`;
+        }
+        
+        function deleteApplication(appId) {
+            if (confirm('⚠️ Delete this application? This action cannot be undone!')) {
+                fetch(`/admin/api/delete-application/${appId}`, {
+                    method: 'DELETE'
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('🗑️ Application deleted!');
+                        document.getElementById(`app-${appId}`).remove();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                });
+            }
+        }
+        
+        function updateApplicationStatus(appId, action) {
+            fetch('/admin/api/update-application', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: appId,
+                    action: action
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`✅ Application ${action}d!`);
+                    location.reload();
+                } else {
+                    alert('❌ Error: ' + data.error);
+                }
+            });
+        }
+        
+        // Bulk Actions
+        function approveAllPending() {
+            if (confirm('Approve ALL pending applications?')) {
+                const pendingApps = document.querySelectorAll('.status-badge.status-pending');
+                if (pendingApps.length === 0) {
+                    alert('No pending applications found.');
+                    return;
+                }
+                
+                if (confirm(`This will approve ${pendingApps.length} pending applications. Continue?`)) {
+                    alert('⏳ Processing bulk approval...');
+                    // In real app, you would call a bulk API
+                    location.reload();
+                }
+            }
+        }
+        
+        function rejectAllPending() {
+            if (confirm('Reject ALL pending applications?')) {
+                alert('This feature would call a bulk API in production.');
+            }
+        }
+        
+        // Search and Filter
+        function searchApplications() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#applicationsTable tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        }
+        
+        function filterApplications() {
+            const filter = document.getElementById('statusFilter').value;
+            const rows = document.querySelectorAll('#applicationsTable tbody tr');
+            
+            rows.forEach(row => {
+                if (filter === 'all') {
+                    row.style.display = '';
+                    return;
+                }
+                
+                const statusBadge = row.querySelector('.status-badge');
+                if (statusBadge && statusBadge.classList.contains(`status-${filter}`)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        function showPendingOnly() {
+            document.getElementById('statusFilter').value = 'pending';
+            filterApplications();
+        }
+        
+        // Export
+        function exportToCSV() {
+            alert('📥 CSV export would be implemented here.');
+        }
+        
+        function exportAllData() {
+            alert('📊 Full data export would be implemented here.');
+        }
+        
+        // Enter key for search
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchApplications();
+            }
+        });
+    </script>
+</body>
+</html>
